@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Recipe {
+  id          Int      @id @default(autoincrement())
+  title       String
+  ingredients String[]  // An array of ingredients
+  cookingTime Int
+  instructions String
+  imageUrl    String?   // Optional field for recipe images
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  categoryId  Int?     // Foreign key linking to Category
+  category    Category? @relation(fields: [categoryId], references: [id]) // Relation to Category
+  userId      Int?     // Optional: if you want to link recipes to users
+  user        User?    @relation(fields: [userId], references: [id]) // Relation to User
+  favorites    Favorite[] // A one-to-many relationship with favorites
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  recipes   Recipe[] // A one-to-many relationship with recipes
+  favorites  Favorite[] // A one-to-many relationship with favorites
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  recipes   Recipe[] // A one-to-many relationship with recipes
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  recipeId  Int
+  user      User     @relation(fields: [userId], references: [id]) // Relation to the User model
+  recipe    Recipe    @relation(fields: [recipeId], references: [id]) // Relation to the Recipe model
+}
